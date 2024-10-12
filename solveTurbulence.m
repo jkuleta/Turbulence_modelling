@@ -48,8 +48,8 @@ function [U_Turbulent_undamped U_Turbulent_damped] = solveTurbulence(Re_tau_valu
                 A_Turbulent(end, end-2) = -3/2;
                 A_Turbulent(end, end-1) = 2;
                 A_Turbulent(end, end) = -0.5;
-            else
-                error('Invalid Neumann scheme');
+            elseif neumann_scheme == 0
+                break
             end
         else
             error('Invalid height condition. Choose either "full" or "half".');
