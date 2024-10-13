@@ -1,7 +1,7 @@
-N = 100;               % Number of grid points
+               % Number of grid points
 H = 1;                 % Total height of the channel
 L_half = H / 2;        % Half-channel height (used as characteristic length)
-dy = H / (N-1);        % Grid spacing
+dy = 0.0001;        % Grid spacing
 nu = 1e-6;             % Kinematic viscosity
 rho = 1.225;           % Density
 Cmu = 0.09;            % Model constant for turbulent viscosity
@@ -10,11 +10,18 @@ sigma_eps = 1.3;       % Model constant for epsilon
 Ce1 = 1.45;            % Dissipation constant C_e1
 Ce2 = 1.9;             % Dissipation constant C_e2
 
+y = 0: dy :H;
+N = length(y)
+
+filenames = {'DNS_180.txt', 'DNS_395.txt', 'DNS_590.txt'};
+DNSData = LoadDNSData(filenames);
+
+
 % Target Reynolds number (Re_tau)
 Re_tau = 180;  % Example: Re_tau = 180
 
 % Calculate friction velocity u_tau from Re_tau
-u_tau_target = Re_tau_target * nu / L_half;
+u_tau_target = Re_tau * nu / L_half;
 
 % Calculate wall shear stress (tau_w)
 %tau_w = rho * u_tau_target^2;
@@ -46,7 +53,7 @@ k(N) = k(N-1);         % Symmetry for k at the center
 eps(N) = eps(N-1);     % Symmetry for epsilon at the center
 
 % Iteration parameters
-maxIter = 100;         % Maximum number of iterations for convergence
+maxIter = 10000;         % Maximum number of iterations for convergence
 tol = 1e-6;            % Tolerance for convergence
 
 % Main iterative solver
@@ -95,7 +102,7 @@ for iter = 1:maxIter
     % Enforce boundary conditions at the wall
     U(1) = 0;            % No-slip condition at the wall (U = 0)
     k(1) = 0;            % k = 0 at the wall
-    eps(1) = 2 * nu / dy^2;  % Wall dissipation rate condition based on viscosity
+    eps(1) = k(1) -2*k(2)+k(3)/dy^2;  % Wall dissipation rate condition based on viscosity
     
     % Enforce boundary conditions at the center
     U(N) = U(N-1);       % Symmetry at the center
@@ -110,7 +117,7 @@ for iter = 1:maxIter
 end
 
 % Display the target Re_tau
-fprintf('Target Re_tau: %f\n', Re_tau_target);
+fprintf('Target Re_tau: %f\n', Re_tau);
 
 % Plot results
 y = linspace(0, H, N);  % Discretized y-axis
@@ -122,7 +129,9 @@ y_plus = y*u_tau_target/nu;
 figure(1);
 semilogx(y_plus, U_plus);
 grid on;
-
+hold on;
+semilogx(DNSData.(['y_plus_', num2str(Re_tau)]), ...
+            DNSData.(['U_mean_', num2str(Re_tau)]))
 % Plot the velocity profile U
 figure;
 subplot(3,1,1);
