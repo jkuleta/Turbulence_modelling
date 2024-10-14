@@ -5,7 +5,7 @@ visc_nu = 1.56*10^(-5);
 rho = 1.225;
 visc_mu = visc_nu*rho;
 H = 1;  
-N = 1001;
+N = 101;
 dy = H/(N-1); 
 
 %% Constants
@@ -24,7 +24,7 @@ DNSData = LoadDNSData(filenames);
 %% Solver
 
 
-MESH = mesh(H, N);
+MESH = mesh_Delft(H, N);
 
 y = MESH.y;
 ddy = MESH.ddy;
@@ -44,18 +44,20 @@ sigma_k = 1;
 sigma_epsilon = 1.3;
 
 %model initiation
-U= 3*ones(N,1);
+U= zeros(N,1);
 
 
-k = 0.001*ones(N,1);
-epsilon = 0.001*ones(N,1);
+k = 100*ones(N,1);
+epsilon = 100*ones(N,1);
+epsilon_min = 1e-12;
+k_min = 1e-12;
 
 visc_nu_eddy = C_mu .* (k.^2) ./ epsilon;
-visc_nu_eddy(1) =0;
-visc_nu_eddy(end) = visc_nu_eddy(end-1);
+
 
 %loop parameters
-maxiter = 2;
+maxiter = 1000;
+
 
 
 %% K-epsilon model
@@ -63,6 +65,8 @@ maxiter = 2;
 for i=1:maxiter
 
     dUdy = ddy*U;
+
+    visc_nu_eddy = C_mu .* (k.^2) ./ epsilon;
 
     %compute Pk
     Pk = visc_nu_eddy .* dUdy.^2;
@@ -86,8 +90,12 @@ for i=1:maxiter
     B_epsilon(end)=0;
     
     epsilon = linsolve(A_epsilon, B_epsilon);
+
+    epsilon(epsilon < epsilon_min) = epsilon_min;
     
     %calculate k 
+    
+    visc_nu_eddy = C_mu .* (k.^2) ./ epsilon;
 
     visc = visc_nu + visc_nu_eddy / sigma_k;
 
@@ -106,13 +114,48 @@ for i=1:maxiter
     B_k(end) = 0;
 
     k = linsolve(A_k, B_k);
+    k(k < k_min) = k_min;
+    
+    %update eddy viscosity
+    visc_nu_eddy = C_mu .* (k.^2) ./ epsilon;
+    
+    %solve rans
+    viscosity = visc_nu + visc_nu_eddy;
+    A_U = bsxfun(@times, viscosity, d2dy2) + bsxfun(@times, ddy * viscosity, ddy);
 
+    A_U(1, :) = 0;
+    A_U(1,1) = 1;
+    A_U(end, :) =0;
+    A_U(end, end-1) = -1;
+    A_U(end, end) = 1;
 
+    B_U = 1/rho * DP_dx * ones(N, 1);
+    B_U(1) = 0;
+    B_U(end) = 0;
 
+    U_old = U;
 
+    U = linsolve(A_U, B_U);
 
 
 end
+
+figure(1);
+plot(U, y);
+grid on;
+
+
+
+U_plus = U / U_tau(1);
+
+y_plus = y*U_tau(1)/visc_nu;
+
+figure(2);
+semilogx(y_plus, U_plus);
+grid on;
+hold on;
+semilogx(DNSData.(['y_plus_', num2str(Re_tau_values(1))]), ...
+            DNSData.(['U_mean_', num2str(Re_tau_values(1))]))
     
 
 
