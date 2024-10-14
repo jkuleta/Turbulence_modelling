@@ -5,7 +5,7 @@ visc_nu = 1.56*10^(-5);
 rho = 1.225;
 visc_mu = visc_nu*rho;
 H = 1;  
-N = 101;
+N = 1001;
 dy = H/(N-1); 
 
 %% Constants
@@ -24,7 +24,7 @@ DNSData = LoadDNSData(filenames);
 %% Solver
 
 
-MESH = mesh_Delft(H, N);
+MESH = mesh(H, N);
 
 y = MESH.y;
 ddy = MESH.ddy;
@@ -35,24 +35,6 @@ visc_nu_eddy = 0 * ones(N,1);
 Re_tau = Re_tau_values(1);
 DP_dx = -Re_tau^2*visc_nu^2/H^3;
 
-%Get laminar velocity
-U = ones(N,1);
-A = zeros(N,N);
-B = ones(N,1);
-    
-B = ((1./((visc_nu + visc_nu_eddy) .* rho)) .* DP_dx .* dy^2) .* B;
-%Boundary conditions
-B(1) = 0;
-B(end) = 0;
- 
-A = d2dy2;
-A(1, :) = 0;
-A(1,1) = 1;
-A(end, :)=0;
-A(end, end-1) = -1;
-A(end, end) = 1;
-    
-U_laminar = linsolve(A,B);
 
 %% k-epsilon model
 %constants
@@ -63,8 +45,8 @@ sigma_k = 1;
 sigma_epsilon = 1.3;
 
 %model initiation
-U_new = zeros(N,1);
-U = U_laminar;
+U= zeros(N,1);
+
 
 k = 0.001*ones(N,1);
 epsilon = 0.001*ones(N,1);
@@ -83,8 +65,6 @@ visc_nu_eddy = C_mu .* (k.^2) ./ epsilon;
 visc_nu_eddy(1) =0;
 visc_nu_eddy(end) = visc_nu_eddy(end-1);
 
-
-U = U_new;
 
 %Model loop
 for i=1:1000
@@ -152,6 +132,8 @@ for i=1:1000
     B_k = - Pk;
     B_k(1) = 0;
     B_k(end) = 0;
+
+    k = linsolve(A_k, B_k);
     
 
     %Calculate eddy viscosity 
@@ -159,11 +141,11 @@ for i=1:1000
     visc_nu_eddy = C_mu * k.^2 ./epsilon;
     visc_nu_eddy(1) =0;
     visc_nu_eddy(end) = visc_nu_eddy(end-1);
-
-    B = 1/rho .*DP_dx*ones(N,1);
+    B = 1/rho.*(1./(visc_nu+visc_nu_eddy)) .*DP_dx.*ones(N,1);
     B(1) = 0;
     B(end) = 0;
-       
+    
+    A = zeros(N);
     for i = 2:N-1
             A(i, i-1) = 1;    % Coefficient U(y-dy)
             A(i, i) = -2;       % Coefficient U(y)

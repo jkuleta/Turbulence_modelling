@@ -105,4 +105,6 @@ function [U_Turbulent_undamped U_Turbulent_damped] = solveTurbulence(Re_tau_valu
         % Solve the system for U_Turbulent (undamped model)
         U_Turbulent_undamped = inv(A_Turbulent) * B_Turbulent;
 
+        disp(DP_dx);
+
 end
