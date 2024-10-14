@@ -45,7 +45,7 @@ Pi = zeros(N,1);       % Production term for turbulence
 % Boundary conditions
 U(1) = 0;              % No-slip condition at the wall (velocity U = 0)
 k(1) = 0;              % k = 0 at the wall
-eps(1) = 2 * nu / dy^2; % Wall dissipation rate condition based on viscosity
+eps(1) = (k(1) -2*k(2)+k(3))/dy^2; % Wall dissipation rate condition based on viscosity
 
 % Boundary conditions at the center
 U(N) = U(N-1);         % Symmetry at the center
@@ -102,7 +102,7 @@ for iter = 1:maxIter
     % Enforce boundary conditions at the wall
     U(1) = 0;            % No-slip condition at the wall (U = 0)
     k(1) = 0;            % k = 0 at the wall
-    eps(1) = k(1) -2*k(2)+k(3)/dy^2;  % Wall dissipation rate condition based on viscosity
+    eps(1) = (k(1) -2*k(2)+k(3))/dy^2;  % Wall dissipation rate condition based on viscosity
     
     % Enforce boundary conditions at the center
     U(N) = U(N-1);       % Symmetry at the center
@@ -130,8 +130,8 @@ figure(1);
 semilogx(y_plus, U_plus);
 grid on;
 hold on;
-semilogx(DNSData.(['y_plus_', num2str(Re_tau)]), ...
-            DNSData.(['U_mean_', num2str(Re_tau)]))
+%semilogx(DNSData.(['y_plus_', num2str(Re_tau)]), ...
+            %DNSData.(['U_mean_', num2str(Re_tau)]))
 % Plot the velocity profile U
 figure;
 subplot(3,1,1);
