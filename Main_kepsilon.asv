@@ -47,13 +47,12 @@ B(end) = 0;
  
 A = d2dy2;
 A(1, :) = 0;
-A(1,1) = 1;
-A(end, :)=0;
 A(end, end-1) = -1;
 A(end, end) = 1;
     
 U_laminar = linsolve(A,B);
 
+plot(U_laminar, y)
 %% k-epsilon model
 %constants
 C_mu = 0.09;
@@ -91,29 +90,28 @@ while error > tolerance && it < 5
     k(k < 1e-6) = 1e-6;
     epsilon(epsilon < 1e-6) = 1e-6;
 
-    dUdy = ddy * U_new;
-
-
-    % dUdy = zeros(N,1);
-    % dUdy(1) = (U_new(2) - U_new(1))/dy;
-    % dUdy(end) = 0;
-    % for i=2:N-1
-    %     dUdy(i) = (U_new(i+1) - U_new(i-1))/(2*dy);
-    % end
-    % A_epsilon = ones(N);
-    % for i = 2:N-1
-    %     A_epsilon(i, i-1) = 4*sigma_epsilon*visc_nu + 4*visc_nu_eddy(i) + visc_nu_eddy (i-1) + visc_nu_eddy (i+1);  % Coefficient U(y-dy)
-    %     A_epsilon (i, i) = -8*visc_nu*sigma_epsilon - 8*visc_nu_eddy(i);       % Coefficient U(y)
-    %     A_epsilon(i, i+1) =  4*sigma_epsilon*visc_nu + 4*visc_nu_eddy(i) + visc_nu_eddy (i-1) + visc_nu_eddy (i+1);    % Coefficient U(y+dy)
-    % end
-    % 
-    % A_epsilon(1, 1) = 1;
-    % A_epsilon(end, end-1) = -1;
-    % A_epsilon(end, end) = 1;
+    dUdy = zeros(N,1);
+    dUdy(1) = (U_new(2) - U_new(1))/dy;
+    dUdy(end) = 0;
+    for i=2:N-1
+        dUdy(i) = (U_new(i+1) - U_new(i-1))/(2*dy);
+    end
+    
+    A_epsilon = ones(N);
+    for i = 2:N-1
+        A_epsilon(i, i-1) = 4*sigma_epsilon*visc_nu + 4*visc_nu_eddy(i) + visc_nu_eddy (i-1) + visc_nu_eddy (i+1);  % Coefficient U(y-dy)
+        A_epsilon (i, i) = -8*visc_nu*sigma_epsilon - 8*visc_nu_eddy(i);       % Coefficient U(y)
+        A_epsilon(i, i+1) =  4*sigma_epsilon*visc_nu + 4*visc_nu_eddy(i) + visc_nu_eddy (i-1) + visc_nu_eddy (i+1);    % Coefficient U(y+dy)
+    end
+    
+    A_epsilon(1, 1) = 1;
+    A_epsilon(end, end-1) = -1;
+    A_epsilon(end, end) = 1;
 
 
     % Calculate Pk 
-    Pk = visc_nu_eddy .* dUdy^2;
+    Pk = visc_nu_eddy .* dUdy.^2;
+
 
     % Compute epsilon
     f_epsilon = sigma_epsilon * (C_2.* epsilon.^2 ./ k - C_1 * epsilon .* Pk ./k);
