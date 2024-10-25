@@ -7,7 +7,7 @@ nu = 1.14e-6;
 wt = [0 45 90 135]; 
 
 %% Load RANS model
-load('out_MatRANS.mat') % Make sure its correct
+load('out_MatRANS_case1.mat') % Make sure its correct
 
 %% Laminar theory solution 
 

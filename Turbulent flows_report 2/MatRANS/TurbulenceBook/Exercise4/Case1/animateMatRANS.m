@@ -2,7 +2,7 @@
 clear all; close all;
 
 % Input
-load('out_MatRANS.mat'); % Load the output workspace
+load('out_MatRANS_case4.mat'); % Load the output workspace
 nrepeat = 2; % No. of times to repeat animation
 ymax = MatRANS.y(end)/2; % Upper limit to plot for y
 ivec = 1:length(MatRANS.t); % Animate all simulated time steps
