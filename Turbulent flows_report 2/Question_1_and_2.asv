@@ -54,9 +54,9 @@ for i = 1:4
         ks_plus = ks*Cases(i).U_fm/nu; %eqn 9.24 
         % Ks_plus is more than 70 so it is hyraulicaly rough
     else
-        delta_y = 0.9* nu/Cases(i).U_fm; % eqn 9.49 0.9 constant is added to ensure eq 9.49 is satisfied 
+        delta_y = nu/Cases(i).U_fm; % eqn 9.49
         ks = 0.1* nu/Cases(i).U_fm; %eqn 9.24
-        ks_plus = 0.1; %eqn 9.24 % should be 0.1 %it is one by definition of previous equation
+        ks_plus = ks*Cases(i).U_fm/nu; %eqn 9.24 % should be 0.1 %it is one by definition of previous equation
     end
 
    % update struct
