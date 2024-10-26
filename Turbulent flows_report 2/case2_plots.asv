@@ -1,0 +1,11 @@
+clear all;
+
+load("out_MatRANS_case2.mat");
+load("Exercise4.mat");
+
+n = 7;
+c = 2; %case number from the data
+
+WBL(2).test
+
+plot(WBL(c).u, WBL(c).y_u, "o")
