@@ -18,17 +18,17 @@ rho = 1000; % Fluid density (kg/m^3);
 nu = 1.14e-6; % Fluid kinematic viscosity (m^2/s)
 
 % Output file name -----------------------------CHANGE FOR EACH CASE
-OutFileName = 'out_MatRANS_case4.mat'; 
+OutFileName = 'out_MatRANS_case3.mat'; 
 
 % Input file data
 load("CaseInfo.mat");
 
-case_number = 4; % only change the case number here
+case_number = 3; % only change the case number here
 
 input_U0m = CaseInfo(case_number).U0m;
 input_dy0 = CaseInfo(case_number).delta_y;
 
-input_ks = CaseInfo(case_number).ks; %UNCOMMENT for CASE 4!!!!
+%input_ks = CaseInfo(case_number).ks; %UNCOMMENT for CASE 4!!!!
 
 
 
@@ -77,7 +77,7 @@ t_span = [0:dt:t2]; % Vector of time levels where output will be saved (s)
 d = 5e-6; % Grain size (m)
 
 %Change this to input_ks for CASE 4!!!!!
-k_s = input_ks; %dy0/10; % Nikuradse's equivalent sand grain roughness (m)
+k_s = dy0/10; % Nikuradse's equivalent sand grain roughness (m)
 
 b = 2*d; % Reference height (m)
 s = 2.65; % Relative sediment density
