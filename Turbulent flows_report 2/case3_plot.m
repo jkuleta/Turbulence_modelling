@@ -1,11 +1,11 @@
 clear all; close all;
 
-load("out_MatRANS_case3.mat");
+load("out_MatRANS_case4.mat");
 load("Exercise4.mat");
 load("CaseInfo.mat");
 
 n = [1, 4, 7, 10];
-c = 3; % case number from the data
+c = 4; % case number from the data
 
 U0m = MatRANS.U0m;
 T = CaseInfo.T;
@@ -30,8 +30,9 @@ for i = 1:length(time_list)
     end
 end
 
-% Create a new figure for u/U0m vs. y/a plots
 figure;
+set(gcf, 'Position', [100, 100, 1200, 400]);
+
 for i = 1:length(phase_angle_rad)
     index = index_list(i);
     u_plot = MatRANS.u(index, :) ./ U0m;
@@ -40,20 +41,30 @@ for i = 1:length(phase_angle_rad)
     u_comparison = WBL(c).u(:, n(i)) ./ WBL(c).U0m;
     y_comparison = WBL(c).y_u ./ a;
 
-    subplot(1, 4, i);
+    subplot(1, length(phase_angle_rad), i);
     plot(u_plot, y_plot, "LineWidth", 1);
     grid on;
     hold on;
     plot(u_comparison, y_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 3);
-    legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12);
+
+    if i == 4
+        legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best');
+    end
+
     ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 12);
     xlabel("$\overline{U} / U_{0m}$", 'Interpreter', 'latex', 'FontSize', 12);
 
-    title(sprintf("Phase Angle: %d°", phase_angle(i)), 'FontSize', 12);
+    title(sprintf('$\\omega t = %d^\\circ$', phase_angle(i)), 'FontSize', 12, 'Interpreter', 'latex');
 end
 
+saveas(gcf, sprintf('case%d_u', c), 'png');
+
+
 % Create a new figure for k/U0m^2 vs. y/a plots
+
 figure;
+set(gcf, 'Position', [100, 100, 1200, 400]);
+
 for i = 1:length(phase_angle_rad)
     index = index_list(i);
 
@@ -61,43 +72,57 @@ for i = 1:length(phase_angle_rad)
     k_comparison = k_comparison ./ (WBL(c).U0m^2);
 
     y_comparison = WBL(c).y_uuvv ./ a;
-
     k_plot = MatRANS.k(index, :) ./ (U0m^2);
 
-    subplot(1, 4, i);
+    subplot(1, length(phase_angle_rad), i);
     plot(k_plot, y_plot, "LineWidth", 1);
     grid on;
     hold on;
     plot(k_comparison, y_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 3);
-    legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12);
+
+    if i == 4
+        legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best');
+    end
+
     ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 12);
     xlabel("$k / U_{0m}^2$", 'Interpreter', 'latex', 'FontSize', 12);
 
-    title(sprintf("Phase Angle: %d°", phase_angle(i)), 'FontSize', 12);
+    title(sprintf('$\\omega t = %d^\\circ$', phase_angle(i)), 'FontSize', 12, 'Interpreter', 'latex');
 end
 
+saveas(gcf, sprintf('case%d_k', c), 'png');
+
 figure;
+set(gcf, 'Position', [100, 100, 1200, 400]);
+
 for i = 1:length(phase_angle)
     index = index_list(i);
 
-    uv = MatRANS.rho * MatRANS.nu_t(index, :) .* gradient(MatRANS.u(index, :));
+    uv = MatRANS.nu_t(index, :) .* gradient(MatRANS.u(index, :), MatRANS.y);
     uv_plot = uv ./ (U0m^2);
     y_plot = MatRANS.y ./ a;
 
     uv_comparison = -WBL(c).uv(:, n(i)) ./ (WBL(c).U0m^2);
-    y_comparison = WBL(c).y_uv ./a;
+    y_comparison = WBL(c).y_uv ./ a;
 
-    subplot(1, 4, i);
-    plot(uv_plot, y_plot);
+    subplot(1, length(phase_angle), i);
+    plot(uv_plot, y_plot, "LineWidth", 1);
     grid on;
     hold on;
-    plot(uv_comparison, y_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 3)
-    legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12);
+    plot(uv_comparison, y_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 3);
+
+    if i == 4
+        legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best');
+    end
+
     ylabel("$y / a$", 'Interpreter', 'latex', 'FontSize', 12);
     xlabel("$-\overline{u'v'} / U_{0m}^2$", 'Interpreter', 'latex', 'FontSize', 12);
 
-    title(sprintf("Phase Angle: %d°", phase_angle(i)), 'FontSize', 12);
+    title(sprintf('$\\omega t = %d^\\circ$', phase_angle(i)), 'FontSize', 12, 'Interpreter', 'latex');
 end
+
+saveas(gcf, sprintf('case%d_uv', c), 'png');
+
 
 time = MatRANS.t(index_list(1):end);
 omegat = (omega * time - 8 * pi) * 180 / pi;
@@ -111,7 +136,10 @@ figure;
 plot(omegat, tau0_plot, "LineWidth", 1.75);
 grid on;
 hold on;
-plot(omegat_comparison, tau0_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 2);
+plot(omegat_comparison, tau0_comparison, "o", "MarkerFaceColor", [1, 0.5, 0], "MarkerSize", 3);
 legend("k-$\omega$ model", "Experimental", 'Interpreter', 'latex', 'FontSize', 12);
-ylabel("$\tau_0 / \rho U_{0m}$", 'Interpreter', 'latex', 'FontSize', 12);
-xlabel("$\omega t [deg]$", 'Interpreter', 'latex', 'FontSize', 12);
+ylabel("$\tau_0 / \rho U_{0m}^2$", 'Interpreter', 'latex', 'FontSize', 12);
+xlabel('$\omega t\ [^\circ]$', 'Interpreter', 'latex', 'FontSize', 12);
+
+saveas(gcf, sprintf('case%d_tau0',c) , 'png');
+

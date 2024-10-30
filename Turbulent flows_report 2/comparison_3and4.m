@@ -32,16 +32,17 @@ grid on;
 hold on;
 plot(u_case4, y_case4, "LineWidth", 1);
 legend("Case 3: smooth turbulent", "Case 4: rough turbulent");
-ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 12);
-xlabel("$\overline{U} / U_{0m}$", 'Interpreter', 'latex', 'FontSize', 12);
+ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 14);
+xlabel("$\overline{U} / U_{0m}$", 'Interpreter', 'latex', 'FontSize', 14);
 
 subplot(1,2,2);
 plot(k_case3, y_case3, "LineWidth",1);
 grid on;
 hold on;
 plot(k_case4, y_case4, "LineWidth", 1);
-legend("Case 3: smooth turbulent", "Case 4: rough turbulent");
-ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 12);
-xlabel("$k / U_{0m}^2$", 'Interpreter', 'latex', 'FontSize', 12);
+ylabel("$y / a $", 'Interpreter', 'latex', 'FontSize', 14);
+xlabel("$k / U_{0m}^2$", 'Interpreter', 'latex', 'FontSize', 14);
+
+saveas(gcf, "comparison_3and4", 'png');
 
 
