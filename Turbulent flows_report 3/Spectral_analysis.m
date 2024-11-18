@@ -1,4 +1,4 @@
-clear all; close all;
+clc; clear; close all;
 
 nu_visc = 1.51 * 1e-5;
 f_sample = 50000;
@@ -73,7 +73,7 @@ f_sample = 1/dt;            % Sampling frequency
 f_N = f_sample / 2;         % Nyquist frequency
 df = f_sample / N;          % Frequency resolution
 
-% FFT Analysis
+%% FFT Analysis
 fft_values = fft(fluc_u);    % Compute FFT of the signal
 Pxx_fft = (1/(f_sample * N)) * abs(fft_values).^2; % Normalize FFT to match PSD
 Pxx_fft(2:end-1) = 2 * Pxx_fft(2:end-1);  % Double values except for DC and Nyquist
@@ -83,20 +83,44 @@ fft_freq = (0:(N/2)) * df;  % Frequency vector for FFT (0 to Nyquist)
 % Use pwelch to calculate PSD
 [welch_values, welch_freq] = pwelch(fluc_u, [], [], [], f_sample);
 
-intgral = trapz(fft_freq(1:(N/2)),Pxx_fft(1:(N/2)));
+integral_signal = trapz(fft_freq(1:(N/2)),Pxx_fft(1:(N/2)));
+
+integral_welch = trapz(welch_freq, welch_values);
 
 % Plot the spectra
 figure(4);
-loglog(fft_freq, Pxx_fft(1:N/2+1), 'LineWidth',1.5); % Plot FFT power spectrum
+loglog(fft_freq, Pxx_fft(1:N/2+1), 'LineWidth',1.25); % Plot FFT power spectrum
 hold on;
 grid on;
-loglog(welch_freq, welch_values, 'LineWidth',1.5);   % Plot Welch's PSD
-xlabel('Frequency (Hz)');
-ylabel('Power Spectral Density');
-title('Comparison of FFT and Welch''s PSD');
-legend('FFT Spectrum', 'Welch''s PSD');
+loglog(welch_freq, welch_values, 'LineWidth',1.25);   % Plot Welch's PSD
+xlabel('Frequency f (Hz)');
+ylabel('Power Spectral Density S(f)'); %I am not sure whether this should power or energy we can ask about it
+legend('FFT', 'Welch method');
 hold off;
 
+
+%% Wavenumber spectrum 
+S_f = Pxx_fft(1:(N/2));
+F_k = u_bar /(4*pi) .*S_f;
+
+k = 2*pi*fft_freq(1:(N/2)) / u_bar;
+integral_f = 2*trapz(k, F_k);
+
+
+%von Karman
+F_k_karman = (Lambda_f * var_u / pi) ./ (1 + 70.78 .* (k .* lambda_f / (2 * pi)).^2).^(5/6);
+
+figure(5);
+loglog(k, F_k, 'LineWidth',1.5);
+hold on;
+grid on;
+loglog(k, F_k_karman, 'LineWidth',1.5);
+legend('Experimental', 'von Karman');
+ylabel('Wave number spectrum F(k)');
+xlabel('Wavenumber k');
+hold off;
+
+%%
 
 
 
