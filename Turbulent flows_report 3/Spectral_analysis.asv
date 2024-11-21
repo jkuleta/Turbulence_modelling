@@ -107,64 +107,27 @@ k = 2*pi*fft_freq(1:(N/2)) / u_bar;
 integral_f = 2*trapz(k, F_k); % Multiplying by 2 = variance
 
 %Welch
-S_f_Welch = welch_values;
-F_k_Welch = u_bar /(4*pi) .*S_f_Welch;
+S_f_Welch = Pxx_fft(1:(N/2));
+F_k = u_bar /(4*pi) .*S_f;
 
-k_Welch = 2*pi*welch_freq / u_bar;
-integral_f_Welch = 2*trapz(k_Welch, F_k_Welch);
+k = 2*pi*fft_freq(1:(N/2)) / u_bar;
+integral_f = 2*trapz(k, F_k);
 
 
 %von Karman
 F_k_karman = (Lambda_f * var_u / pi) ./ (1 + 70.78 .* (k .* Lambda_f / (2 * pi)).^2).^(5/6);
 
-% Plot wave number spectrum
 figure(5);
-loglog(k, F_k, '.');
+loglog(k, F_k, 'LineWidth',1.5);
 hold on;
 grid on;
-loglog(k_Welch, F_k_Welch, '.');
-loglog(k, F_k_karman, 'LineWidth', 1.5);
-
-
-% Find index where von Karman wavenumber is 10^4
-[~, end_idx] = min(abs(k - 1e4)); % Find closest index to k = 10^4
-k_end = k(end_idx); % Actual wavenumber at the closest index
-F_k_end = F_k_karman(end_idx); % Corresponding F(k) value at this point
-
-% Define the inertial subrange: go backward from k_end to a lower bound (e.g., k_min = 1e1)
-k_min = 1e1;
-inertial_idx = k >= k_min & k <= k_end; % Indices between k_min and k_end
-k_inertial = k(inertial_idx); % Subset of wavenumbers for inertial subrange
-
-% Compute the -5/3 slope line
-F_k_ref = F_k_end * (k_inertial / k_end).^(-5/3); % Scale using -5/3 slope
-loglog(k_inertial, F_k_ref, 'k-.', 'LineWidth', 1.5); % Overlay the line
-
-% Place vertical reference lines with labels at the bottom
-xline(1e2, 'r--', 'Inertial', 'LineWidth', 1.5, 'LabelVerticalAlignment', 'bottom');
-xline(4500, 'r--', 'Dissipation', 'LineWidth', 1.5, 'LabelVerticalAlignment', 'bottom');
-
-% Characteristic wave numbers - question 10
-k_macro = 1 / Lambda_f;
-k_micro = 1 / lambda_f;
-k_kolmogorov = 1 / eta_K;
-
-xline(k_macro, 'm--', 'k_{macro}', 'LineWidth', 1.5, 'LabelVerticalAlignment', 'bottom');
-xline(k_micro, 'm--', 'k_{micro}', 'LineWidth', 1.5, 'LabelVerticalAlignment', 'bottom');
-xline(k_kolmogorov, 'm--', 'k_{kolmogorov}', 'LineWidth', 1.5, 'LabelVerticalAlignment', 'bottom');
-
-% Add label for the -5/3 slope
-%text(k_inertial(floor(end/2)), F_k_ref(floor(end/2)), '-5/3 slope', 'Rotation', -39, 'FontSize', 10);
-
-% Add legend and labels
-legend('Experimental', 'Welch', 'von Karman', '-5/3 slope','Location','southwest');
+loglog(k, F_k_karman, 'LineWidth',1.5);
+legend('Experimental', 'von Karman');
 ylabel('Wave number spectrum F(k)');
 xlabel('Wavenumber k');
 hold off;
 
-
 %%
-
 
 
 
